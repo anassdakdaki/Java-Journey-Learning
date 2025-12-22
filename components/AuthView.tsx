@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { CheckIcon, XIcon } from './icons/FeedbackIcons';
+import { supabase } from '../src/supabaseClient';
 
 interface AuthViewProps {
   onLogin: (user: User) => void;
@@ -20,75 +21,78 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
     setMessage(null);
   }, [mode]);
 
-  const loadUsers = (): Array<{ email: string; password: string; user: User }> => {
-    try {
-      const raw = localStorage.getItem('javaJourneyUsers');
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const saveUsers = (users: Array<{ email: string; password: string; user: User }>) => {
-    localStorage.setItem('javaJourneyUsers', JSON.stringify(users));
-  };
-
-  const setCurrentUser = (user: User) => {
-    localStorage.setItem('javaJourneyUser', JSON.stringify(user));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
     setMessage(null);
 
-    const users = loadUsers();
+    try {
+      if (mode === 'signup') {
+        if (!name.trim() || !email.trim() || !password.trim()) {
+          setMessage({ type: 'error', text: 'Please fill out all fields.' });
+          return;
+        }
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: password.trim(),
+          options: {
+            data: {
+              name: name.trim(),
+              avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)],
+            },
+          },
+        });
 
-    if (mode === 'signup') {
-      if (!name.trim() || !email.trim() || !password.trim()) {
-        setMessage({ type: 'error', text: 'Please fill out all fields.' });
-        setIsSubmitting(false);
-        return;
-      }
-      const exists = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (exists) {
-        setMessage({ type: 'error', text: 'An account with this email already exists.' });
-        setIsSubmitting(false);
-        return;
-      }
-      const user: User = {
-        id: `${Date.now()}`,
-        name: name.trim(),
-        email: email.trim(),
-        avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)]
-      };
-      const nextUsers = [...users, { email: user.email, password, user }];
-      saveUsers(nextUsers);
-      setCurrentUser(user);
-      onLogin(user);
-      setMessage({ type: 'success', text: 'Account created successfully.' });
-      setIsSubmitting(false);
-      return;
-    }
+        if (error) {
+          setMessage({ type: 'error', text: error.message });
+          return;
+        }
 
-    if (mode === 'login') {
-      if (!email.trim() || !password.trim()) {
-        setMessage({ type: 'error', text: 'Please provide email and password.' });
-        setIsSubmitting(false);
-        return;
+        if (data.user) {
+          const supabaseUser: User = {
+            id: data.user.id,
+            email: data.user.email || '',
+            name: name.trim(),
+            avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)],
+          };
+          onLogin(supabaseUser);
+          setMessage({ type: 'success', text: 'Account created successfully! Please check your email to confirm.' });
+        } else {
+          setMessage({ type: 'success', text: 'Sign up successful! Please check your email to confirm your account.' });
+        }
+
+      } else { // mode === 'login'
+        if (!email.trim() || !password.trim()) {
+          setMessage({ type: 'error', text: 'Please provide email and password.' });
+          return;
+        }
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        });
+
+        if (error) {
+          setMessage({ type: 'error', text: error.message });
+          return;
+        }
+
+        if (data.user) {
+          const supabaseUser: User = {
+            id: data.user.id,
+            email: data.user.email || '',
+            name: data.user.user_metadata?.name || '',
+            avatar: data.user.user_metadata?.avatar || '',
+          };
+          onLogin(supabaseUser);
+          setMessage({ type: 'success', text: 'Logged in successfully.' });
+        }
       }
-      const match = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-      if (!match) {
-        setMessage({ type: 'error', text: 'Invalid email or password.' });
-        setIsSubmitting(false);
-        return;
-      }
-      setCurrentUser(match.user);
-      onLogin(match.user);
-      setMessage({ type: 'success', text: 'Logged in successfully.' });
+    } catch (err) {
+      const messageText = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setMessage({ type: 'error', text: messageText });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
   };
 
@@ -165,26 +169,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
           {mode === 'login' ? 'Log In' : 'Create Account'}
         </button>
       </form>
-      <div className="mt-4">
-        <button
-          onClick={() => {
-            const demo: User = {
-              id: 'demo',
-              name: 'Demo User',
-              email: 'demo@example.com',
-              avatar: '🧪',
-            };
-            localStorage.setItem('javaJourneyUser', JSON.stringify(demo));
-            onLogin(demo);
-          }}
-          className="w-full border border-base-300 dark:border-base-300-dark text-primary hover:bg-primary/10 font-semibold py-2 rounded-md transition-colors"
-        >
-          Login as Demo
-        </button>
-      </div>
     </div>
   );
 };
 
 export default AuthView;
-

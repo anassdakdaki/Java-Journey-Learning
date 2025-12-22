@@ -14,7 +14,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogout }) =
   const [name, setName] = useState(user.name);
   const [avatar, setAvatar] = useState(user.avatar || AVATARS[0]);
   const [message, setMessage] = useState<string | null>(null);
-  const [aiKey, setAiKey] = useState<string>((user as any).aiKey || '');
+  const [aiKey, setAiKey] = useState<string>(user.aiKey || '');
   const notes: Array<{ lessonId: string; title: string; date: string }> = (() => {
     try {
       const raw = localStorage.getItem('javaJourneyNotes');
@@ -38,7 +38,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onUpdate, onLogout }) =
       const next = users.map(entry => entry.user.email === updated.email ? { ...entry, user: updated } : entry);
       localStorage.setItem('javaJourneyUsers', JSON.stringify(next));
       localStorage.setItem('javaJourneyUser', JSON.stringify(updated));
-    } catch {}
+    } catch (err) {
+      console.error('Failed to update stored user profile', err);
+    }
   };
 
   const handleSave = async () => {

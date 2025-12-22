@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { BUG_FIX_LEVELS } from '../../constants/gamesData';
 import CodeEditor from '../CodeEditor';
 import { runJavaCode } from '../../services/aiService';
-import { CheckCircleIcon, XIcon } from '../icons/FeedbackIcons';
+import { CheckCircleIcon } from '../icons/FeedbackIcons';
 
 interface BugBattleGameProps {
   onExit: () => void;

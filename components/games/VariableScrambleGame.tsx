@@ -26,15 +26,6 @@ const VariableScrambleGame: React.FC<VariableScrambleGameProps> = ({ onExit, onN
   // Derived score
   const score = useMemo(() => solvedWords.filter(s => s).length, [solvedWords]);
 
-  // Shuffle word when index changes
-  useEffect(() => {
-    if (currentData) {
-      setShuffledWord(shuffleString(currentData.word));
-      setUserGuess('');
-      setFeedback('');
-    }
-  }, [currentIndex, currentData]);
-
   const shuffleString = (str: string) => {
     const arr = str.split('');
     for (let i = arr.length - 1; i > 0; i--) {
@@ -43,6 +34,15 @@ const VariableScrambleGame: React.FC<VariableScrambleGameProps> = ({ onExit, onN
     }
     return arr.join('');
   };
+
+  // Shuffle word when index changes
+  useEffect(() => {
+    if (currentData) {
+      setShuffledWord(shuffleString(currentData.word));
+      setUserGuess('');
+      setFeedback('');
+    }
+  }, [currentIndex, currentData]);
 
   const checkAnswer = () => {
     if (userGuess.toUpperCase().trim() === currentData.word) {

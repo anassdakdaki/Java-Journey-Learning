@@ -38,6 +38,11 @@ export const ExerciseStepView: React.FC<ExerciseStepProps> = ({ step, onComplete
       \`\`\`
 
       The user's current answer in the blank is: "${userAnswer || '(empty)'}"
+
+      Here is the code with the current answer filled in:
+      \`\`\`java
+      ${fullCodeWithAnswer}
+      \`\`\`
     `;
     openAssistant(context);
   };

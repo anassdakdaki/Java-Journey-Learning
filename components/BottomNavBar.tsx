@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { HomeIcon, UserIcon, BookOpenIcon, PuzzlePieceIcon, CodeBracketIcon, AcademicCapIcon } from './icons/FeedbackIcons';
+import { UserIcon, BookOpenIcon, PuzzlePieceIcon, CodeBracketIcon, AcademicCapIcon } from './icons/FeedbackIcons';
 
 interface BottomNavBarProps {
   currentView: string;
@@ -16,6 +16,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentView, onNavigate, is
           className={`flex flex-col items-center justify-center p-2 text-xs font-medium rounded-lg transition-colors duration-200
             ${currentView === 'course' ? 'text-primary dark:text-primary-dark bg-primary-light/10 dark:bg-primary-dark/10' : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-dark'}`}
           to="/learn/java"
+          onClick={() => onNavigate('course', 'dashboard')}
         >
           <BookOpenIcon className="w-6 h-6 mb-1" />
           <span>Course</span>
@@ -24,6 +25,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentView, onNavigate, is
           className={`flex flex-col items-center justify-center p-2 text-xs font-medium rounded-lg transition-colors duration-200
             ${currentView === 'games' ? 'text-primary dark:text-primary-dark bg-primary-light/10 dark:bg-primary-dark/10' : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-dark'}`}
           to="/practice/java"
+          onClick={() => onNavigate('games')}
         >
           <PuzzlePieceIcon className="w-6 h-6 mb-1" />
           <span>Games</span>
@@ -32,6 +34,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentView, onNavigate, is
           className={`flex flex-col items-center justify-center p-2 text-xs font-medium rounded-lg transition-colors duration-200
             ${currentView === 'projects' ? 'text-primary dark:text-primary-dark bg-primary-light/10 dark:bg-primary-dark/10' : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-dark'}`}
           to="/projects/java"
+          onClick={() => onNavigate('projects')}
         >
           <CodeBracketIcon className="w-6 h-6 mb-1" />
           <span>Projects</span>
@@ -40,6 +43,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentView, onNavigate, is
           className={`flex flex-col items-center justify-center p-2 text-xs font-medium rounded-lg transition-colors duration-200
             ${currentView === 'resources' ? 'text-primary dark:text-primary-dark bg-primary-light/10 dark:bg-primary-dark/10' : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-dark'}`}
           to="/resources/java"
+          onClick={() => onNavigate('resources')}
         >
           <AcademicCapIcon className="w-6 h-6 mb-1" />
           <span>Resources</span>
@@ -49,6 +53,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentView, onNavigate, is
             className={`flex flex-col items-center justify-center p-2 text-xs font-medium rounded-lg transition-colors duration-200
               ${currentView === 'profile' ? 'text-primary dark:text-primary-dark bg-primary-light/10 dark:bg-primary-dark/10' : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-dark'}`}
             to="/profile"
+            onClick={() => onNavigate('profile')}
           >
             <UserIcon className="w-6 h-6 mb-1" />
             <span>Profile</span>
@@ -58,6 +63,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentView, onNavigate, is
             className={`flex flex-col items-center justify-center p-2 text-xs font-medium rounded-lg transition-colors duration-200
               ${currentView === 'auth' ? 'text-primary dark:text-primary-dark bg-primary-light/10 dark:bg-primary-dark/10' : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-dark'}`}
             to="/profile"
+            onClick={() => onNavigate('auth')}
           >
             <UserIcon className="w-6 h-6 mb-1" />
             <span>Login</span>

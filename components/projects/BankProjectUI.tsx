@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface BankProjectUIProps {
   onInteract: (input: string) => Promise<string>;
@@ -12,21 +12,21 @@ const BankProjectUI: React.FC<BankProjectUIProps> = ({ onInteract, isLoading }) 
   const [logs, setLogs] = useState<string[]>(['System initialized. Waiting for connection...']);
   const [activeScreen, setActiveScreen] = useState<'home' | 'actions'>('home');
 
-  const addLog = (msg: string) => setLogs(prev => [...prev, msg]);
+  const addLog = useCallback((msg: string) => setLogs(prev => [...prev, msg]), []);
 
-  const handleCommand = async (command: string, value?: string) => {
+  const handleCommand = useCallback(async (command: string, value?: string) => {
     let fullInput = command;
     if (value) fullInput += ` ${value}`;
 
     addLog(`> Sending: ${fullInput}`);
-    
+
     const output = await onInteract(fullInput);
-    
+
     // Parse Output
     const lines = output.split('\n');
     lines.forEach(line => {
       addLog(`< ${line}`);
-      
+
       // Heuristic Parsing for UI Updates
       if (line.includes('BALANCE:')) {
         const balStr = line.split('BALANCE:')[1].trim();
@@ -39,12 +39,12 @@ const BankProjectUI: React.FC<BankProjectUIProps> = ({ onInteract, isLoading }) 
          // Maybe show a toast or animation
       }
     });
-  };
+  }, [addLog, onInteract]);
 
   useEffect(() => {
       // Initial balance check
       handleCommand("BALANCE");
-  }, []);
+  }, [handleCommand]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-4 rounded-lg">

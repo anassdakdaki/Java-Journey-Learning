@@ -1,5 +1,7 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { supabase } from './src/supabaseClient';
+import { saveProgress, loadProgress } from './src/services/progressService';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { COURSE_CONTENT } from './constants';
 import LessonView from './components/LessonView';
@@ -31,12 +33,44 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<Theme>('light');
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [assistantContext, setAssistantContext] = useState('');
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null); // Supabase user
   const location = useLocation();
   const navigate = useNavigate();
 
-  const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
-  const getStableSlug = (prefix: string, id: string, title: string) => {
+  // Supabase Auth Listener
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          // User is logged in
+          const supabaseUser: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.name || '',
+            avatar: session.user.user_metadata?.avatar || '',
+          };
+          setUser(supabaseUser);
+          // Load progress from Supabase for this user
+          const userProgress = await loadProgress(session.user.id);
+          if (userProgress) {
+            setCompletedSteps(new Set(userProgress.map(p => p.step_id)));
+          }
+        } else {
+          // User is logged out
+          setUser(null);
+          setCompletedSteps(new Set()); // Clear progress on logout
+        }
+      }
+    );
+
+    // Cleanup the listener on component unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const slugify = useCallback((s: string) => s.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-'), []);
+  const getStableSlug = useCallback((prefix: string, id: string, title: string) => {
     try {
       const key = `jj.slug.${prefix}:${id}`;
       const existing = localStorage.getItem(key);
@@ -47,18 +81,18 @@ const App: React.FC = () => {
     } catch {
       return slugify(title);
     }
-  };
-  const sectionSlugs = useMemo(() => COURSE_CONTENT.map(sec => getStableSlug('section', sec.id, sec.title)), []);
+  }, [slugify]);
+  const sectionSlugs = useMemo(() => COURSE_CONTENT.map(sec => getStableSlug('section', sec.id, sec.title)), [getStableSlug]);
   const lessonSlugsBySection = useMemo(
     () => COURSE_CONTENT.map(sec => sec.lessons.map(lesson => getStableSlug('lesson', lesson.id, lesson.title))),
-    []
+    [getStableSlug]
   );
   const projectSlugs = useMemo(
     () => PROJECTS.reduce<Record<string, string>>((acc, p) => {
       acc[p.id] = getStableSlug('project', p.id, p.title);
       return acc;
     }, {}),
-    []
+    [getStableSlug]
   );
   const findProjectBySlug = (slug: string): Project | null => {
     for (const p of PROJECTS) {
@@ -66,30 +100,18 @@ const App: React.FC = () => {
     }
     return null;
   };
-  const findSectionIndexBySlug = (slug: string) => {
+  const findSectionIndexBySlug = useCallback((slug: string) => {
     const idx = sectionSlugs.findIndex(s => s === slug);
     return idx >= 0 ? idx : 0;
-  };
+  }, [sectionSlugs]);
   const findLessonIndexBySlug = (sectionIndex: number, slug: string) => {
     const arr = lessonSlugsBySection[sectionIndex] || [];
     const idx = arr.findIndex(s => s === slug);
     return idx >= 0 ? idx : 0;
   };
-  // Load progress and theme from localStorage on initial render
+  // Load progress and theme from localStorage/Supabase on initial render
   useEffect(() => {
     try {
-      // Load progress
-      const savedProgressRaw = localStorage.getItem('javaJourneyProgress');
-      if (savedProgressRaw) {
-        const savedProgress = JSON.parse(savedProgressRaw);
-        setCurrentSectionIndex(savedProgress.currentSectionIndex || 0);
-        setCurrentLessonIndex(savedProgress.currentLessonIndex || 0);
-        setCurrentStepIndex(savedProgress.currentStepIndex || 0);
-        setCompletedSteps(new Set(savedProgress.completedSteps || []));
-        setView(savedProgress.view || 'dashboard');
-        setMainView(savedProgress.mainView || 'course');
-      }
-
       // Load theme
       const savedTheme = localStorage.getItem('theme') as Theme | null;
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -99,7 +121,7 @@ const App: React.FC = () => {
         setTheme('dark');
       }
       
-      // Load user
+      // Load user from localStorage (if any, for initial render before Supabase auth listener kicks in)
       const savedUserRaw = localStorage.getItem('javaJourneyUser');
       if (savedUserRaw) {
         const savedUser: User = JSON.parse(savedUserRaw);
@@ -111,7 +133,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Save progress to localStorage whenever it changes
+  // Save progress to localStorage and Supabase whenever it changes
   useEffect(() => {
     try {
       const progressToSave = {
@@ -123,10 +145,19 @@ const App: React.FC = () => {
         mainView,
       };
       localStorage.setItem('javaJourneyProgress', JSON.stringify(progressToSave));
+
+      // Save to Supabase if user is logged in
+      if (user?.id) {
+        completedSteps.forEach(async (stepId) => {
+          const [lessonId] = stepId.split('-'); // Assuming stepId format like 'lessonId-stepId'
+          await saveProgress(user.id, { lesson_id: lessonId, step_id: stepId, is_completed: true });
+        });
+      }
+
     } catch (error) {
-      console.error("Failed to save progress to localStorage:", error);
+      console.error("Failed to save progress:", error);
     }
-  }, [currentSectionIndex, currentLessonIndex, currentStepIndex, completedSteps, view, mainView]);
+  }, [currentSectionIndex, currentLessonIndex, currentStepIndex, completedSteps, view, mainView, user]);
 
   // Handle theme changes
   useEffect(() => {
@@ -161,7 +192,8 @@ const App: React.FC = () => {
     navigate('/profile');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     localStorage.removeItem('javaJourneyUser');
     navigate('/learn/java');
@@ -547,7 +579,7 @@ const App: React.FC = () => {
     document.title = title;
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', description);
-  }, [location.pathname, currentLesson.title, navigate]);
+  }, [location.pathname, currentLesson.title, findSectionIndexBySlug, lessonSlugsBySection, navigate, sectionSlugs]);
 
   return (
     <div className="bg-base-200 dark:bg-base-200-dark min-h-screen font-sans text-content-100 dark:text-content-100-dark flex flex-col">

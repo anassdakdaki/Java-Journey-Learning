@@ -98,6 +98,7 @@ const PracticeStep: React.FC<PracticeStepProps> = ({ step, onComplete, openAssis
       const feedbackResult = await getJavaCodeFeedback(step.problem, userCode);
       setFeedback(feedbackResult);
     } catch (error) {
+      console.error('Failed to fetch feedback for practice step', error);
       setFeedback("Sorry, I couldn't get feedback for your code right now.");
     } finally {
       setIsGettingFeedback(false);

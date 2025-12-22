@@ -1,9 +1,32 @@
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { YOUTUBE_RESOURCES, WEBSITE_RESOURCES, BOOK_RESOURCES } from '../constants/resourcesData';
 import { GlobeIcon } from './icons/FeedbackIcons';
+import { fetchCatFact } from '../services/publicApi';
 
 const ResourcesView: React.FC = () => {
+  const [catFact, setCatFact] = useState<string>('');
+  const [factError, setFactError] = useState<string | null>(null);
+  const [isLoadingFact, setIsLoadingFact] = useState(false);
+
+  const loadCatFact = useCallback(async () => {
+    setIsLoadingFact(true);
+    setFactError(null);
+    try {
+      const fact = await fetchCatFact();
+      setCatFact(fact);
+    } catch (error) {
+      console.error('Failed to fetch cat fact', error);
+      setFactError('Unable to load a cat fact right now. Please try again.');
+    } finally {
+      setIsLoadingFact(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCatFact();
+  }, [loadCatFact]);
+
   return (
     <div className="w-full max-w-6xl animate-fade-in space-y-12 px-4">
       
@@ -14,6 +37,34 @@ const ResourcesView: React.FC = () => {
           Expand your knowledge with these hand-picked resources. Watch tutorials, read documentation, and find the best books.
         </p>
       </div>
+
+      {/* Section 0: Free API Playground */}
+      <section className="rounded-xl bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border border-base-300 dark:border-gray-700 shadow-md p-4 md:p-6 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Free API</p>
+            <h2 className="text-xl md:text-2xl font-bold text-content-100 dark:text-white">Cat Facts (no key required)</h2>
+            <p className="text-sm text-content-200 dark:text-content-200-dark">Example of calling a public API you can reuse elsewhere in the app.</p>
+          </div>
+          <button
+            onClick={loadCatFact}
+            disabled={isLoadingFact}
+            className="px-4 py-2 bg-secondary text-white font-semibold rounded-md shadow hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+          >
+            {isLoadingFact ? 'Fetching...' : 'New Fact'}
+          </button>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-base-300 dark:border-gray-700 p-4 shadow-inner">
+          {factError ? (
+            <p className="text-sm text-red-600 dark:text-red-300">{factError}</p>
+          ) : (
+            <p className="text-base text-content-100 dark:text-white leading-relaxed">
+              {catFact || 'Loading a fun fact...'}
+            </p>
+          )}
+          <p className="text-xs text-content-200 dark:text-content-200-dark mt-2">Source: catfact.ninja</p>
+        </div>
+      </section>
 
       {/* Section 1: Video Courses */}
       <section className="rounded-xl bg-gray-50 dark:bg-gray-900/10 p-2 md:p-4">

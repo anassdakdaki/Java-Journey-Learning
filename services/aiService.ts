@@ -9,7 +9,7 @@ function getApiKey(): string | null {
       const u = JSON.parse(raw);
       if (u && typeof u.aiKey === 'string' && u.aiKey.trim()) return u.aiKey.trim();
     }
-  } catch {}
+  } catch (e) { void e; }
   const envKey = process.env.AI_API_KEY;
   return envKey && envKey.trim() ? envKey.trim() : null;
 }

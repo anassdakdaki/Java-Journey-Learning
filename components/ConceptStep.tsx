@@ -24,6 +24,7 @@ const ConceptStep: React.FC<ConceptStepProps> = ({ step, openAssistant }) => {
       const result = await explainJavaCode(step.codeExample);
       setExplanation(result);
     } catch (error) {
+      console.error('Failed to explain code example', error);
       setExplanation('Failed to get explanation.');
     } finally {
       setIsExplaining(false);

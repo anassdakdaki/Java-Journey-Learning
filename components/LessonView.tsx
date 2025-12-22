@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Step, ExerciseStepType } from '../types';
+import { Step } from '../types';
 import ConceptStep from './ConceptStep';
 import { ExerciseStepView } from './ExerciseStep';
 import PracticeStep from './PracticeStep';

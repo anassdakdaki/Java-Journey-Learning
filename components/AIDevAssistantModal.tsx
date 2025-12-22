@@ -76,11 +76,12 @@ const AIDevAssistantModal: React.FC<AIDevAssistantModalProps> = ({ isOpen, onClo
         });
       }
     } catch (error) {
-       setMessages(prevMessages => {
-          const updated = [...prevMessages];
-          updated[updated.length - 1] = { role: 'ai', content: "Sorry, I encountered an error. Please try again." };
-          return updated;
-        });
+      console.error('Failed to fetch assistant response', error);
+      setMessages(prevMessages => {
+        const updated = [...prevMessages];
+        updated[updated.length - 1] = { role: 'ai', content: "Sorry, I encountered an error. Please try again." };
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }

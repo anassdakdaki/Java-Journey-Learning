@@ -2,7 +2,6 @@
 import React from 'react';
 import { Section } from '../types';
 import { CheckCircleIcon, PlayIcon } from './icons/FeedbackIcons';
-import { COURSE_CONTENT } from '../constants';
 import { Link } from 'react-router-dom';
 
 interface DashboardViewProps {

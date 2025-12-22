@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { TRIVIA_QUESTIONS } from '../../constants/gamesData';
-import { CheckCircleIcon, XIcon } from '../icons/FeedbackIcons';
 
 interface TriviaGameProps {
   onExit: () => void;
