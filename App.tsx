@@ -50,6 +50,11 @@ const App: React.FC = () => {
             avatar: session.user.user_metadata?.avatar || '',
           };
           setUser(supabaseUser);
+          try {
+            localStorage.setItem('javaJourneyUser', JSON.stringify(supabaseUser));
+          } catch (err) {
+            console.error('Failed to persist user locally', err);
+          }
           // Load progress from Supabase for this user
           const userProgress = await loadProgress(session.user.id);
           if (userProgress) {
@@ -59,6 +64,11 @@ const App: React.FC = () => {
           // User is logged out
           setUser(null);
           setCompletedSteps(new Set()); // Clear progress on logout
+          try {
+            localStorage.removeItem('javaJourneyUser');
+          } catch (err) {
+            console.error('Failed to clear cached user', err);
+          }
         }
       }
     );
@@ -189,6 +199,11 @@ const App: React.FC = () => {
 
   const handleLogin = (u: User) => {
     setUser(u);
+    try {
+      localStorage.setItem('javaJourneyUser', JSON.stringify(u));
+    } catch (err) {
+      console.error('Failed to cache user after login', err);
+    }
     navigate('/profile');
   };
 
@@ -201,6 +216,11 @@ const App: React.FC = () => {
 
   const handleUpdateUser = (u: User) => {
     setUser(u);
+    try {
+      localStorage.setItem('javaJourneyUser', JSON.stringify(u));
+    } catch (err) {
+      console.error('Failed to cache user after update', err);
+    }
   };
 
 
