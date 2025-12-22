@@ -1,0 +1,5 @@
+{
+  "name": "Java Journey",
+  "description": "An interactive, step-by-step platform to learn Java programming. Featuring lessons, exercises, and a live code runner powered by AI, it's your personal guide to mastering Java, inspired by Duolingo and SoloLearn.",
+  "requestFramePermissions": []
+}

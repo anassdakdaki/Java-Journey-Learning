@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Java Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1E40AF',
+              secondary: '#3B82F6',
+              accent: '#F59E0B',
+              'base-100': {
+                DEFAULT: '#FFFFFF',
+                dark: '#1F2937' // gray-800
+              },
+              'base-200': {
+                DEFAULT: '#F3F4F6',
+                dark: '#111827' // gray-900
+              },
+              'base-300': {
+                DEFAULT: '#E5E7EB',
+                dark: '#374151' // gray-700
+              },
+              'content-100': {
+                DEFAULT: '#1F2937',
+                dark: '#F9FAFB' // gray-50
+              },
+              'content-200': {
+                DEFAULT: '#4B5563',
+                dark: '#D1D5DB' // gray-300
+              },
+              success: '#10B981',
+              error: '#EF4444',
+              // IDE Theme Colors
+              'ide-bg': '#1e1e1e',
+              'ide-fg': '#d4d4d4',
+              'ide-keyword': '#569cd6', // Blue
+              'ide-control': '#c586c0', // Purple
+              'ide-string': '#ce9178', // Orange
+              'ide-comment': '#6a9955', // Green
+              'ide-number': '#b5cea8', // Light Green
+              'ide-class': '#4ec9b0', // Teal
+              'ide-method': '#dcdcaa', // Yellow
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-in-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: 0, transform: 'translateY(-10px)' },
+                '100%': { opacity: 1, transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-base-200 dark:bg-base-200-dark">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
