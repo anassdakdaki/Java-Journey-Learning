@@ -45,8 +45,8 @@ Follow these steps to get Java-Journey-Learn up and running on your local machin
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/Java-Journey-Learn.git
-cd Java-Journey-Learn
+git clone https://github.com/anassdakdaki/Java-Journey-Learning.git
+cd Java-Journey-Learning
 ```
 
 ### 2. Install Dependencies
